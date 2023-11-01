@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<img id='image_stream' src="{{ url_for('video_feed') }}" style="width= 100%;">
+{#<p id="prediction">{{ url_for('prediction_text') }}</p>#}
+<script>
+    const predictionElement = document.getElementById('prediction');
+    const imageStream = document.getElementById('image_stream');
+    // const eventSource = new EventSource('/video_feed');
+
+    // eventSource.onmessage = (event) => {
+      //  predictionElement.innerHTML = event.prediction;
+    // };
+</script>
+</body>
+</html>

@@ -1,7 +1,20 @@
+import requests
 import tensorflow as tf
 import numpy as np
+import cv2
 
-model = tf.keras.models.load_model('model.h5')
+model = tf.keras.models.load_model('model.h5', compile=False)
+
+
+def predictions():
+    cap = cv2.VideoCapture('http://localhost:5001/api/video_feed')
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            continue
+        result = predict_frame(frame)
+        print(result)
+        yield f'data: {result}\n\n'
 
 
 def predict_frame(img):

@@ -1,18 +1,17 @@
-from flask import Blueprint
-from prediction import predict_frame
+from flask import Blueprint, Response, render_template, stream_with_context
+from apps.prediction.utility import predictions
 
 prediction = Blueprint('prediction', __name__, template_folder='templates/prediction')
 
 
 @prediction.route('/')
 def home():
-    return 'Prediction Home'
+    return render_template('index.html')
 
 
-@prediction.route('/predict')
-def predict():
-    result = predict_frame()
-    return result
+@prediction.route('/sse')
+def sse():
+    return Response(stream_with_context(predictions()), mimetype='text/event-stream')
 
 
 @prediction.app_errorhandler(404)

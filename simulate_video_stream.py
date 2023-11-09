@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request, render_template, Response
+from flask import Flask, jsonify, request, render_template, Response, stream_with_context
+import time
 
 app = Flask(__name__)
 
@@ -17,6 +18,7 @@ def stream_video():  # put application's code here
             if not chunk:
                 break
             yield chunk
+            time.sleep(0.04)
 
 
 @app.route('/')
@@ -26,7 +28,7 @@ def index():
 
 @app.route('/api/video_feed')
 def video_feed():
-    return Response(stream_video(),
+    return Response(stream_with_context(stream_video()),
                     mimetype='video/mp4')
 
 

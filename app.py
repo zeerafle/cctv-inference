@@ -6,10 +6,10 @@ def create_app():
     app = Flask(__name__)
 
     # register blueprint
-    prediction.register_blueprint(prediction)
+    app.register_blueprint(prediction, url_prefix='/prediction')
 
     return app
 
 
 if __name__ == '__main__':
-    create_app().run()
+    create_app().run(debug=True)

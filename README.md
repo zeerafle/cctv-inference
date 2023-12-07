@@ -15,6 +15,6 @@
 
 ## Example
 
-![Example](https://github/zeerafle/cctv-inference/blob/master/example.gif)
+![Example](https://github.com/zeerafle/cctv-inference/blob/master/example.gif)
 
 

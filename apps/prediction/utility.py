@@ -1,4 +1,3 @@
-import requests
 import tensorflow as tf
 import numpy as np
 import cv2
@@ -7,7 +6,7 @@ model = tf.keras.models.load_model('model.h5', compile=False)
 
 
 def predictions():
-    cap = cv2.VideoCapture('http://localhost:5001/api/video_feed')
+    cap = cv2.VideoCapture('https://api.santer.app/cctv/8dmaVnJyLO112oWWt0vNH/stream')
     while True:
         ret, frame = cap.read()
         if not ret:

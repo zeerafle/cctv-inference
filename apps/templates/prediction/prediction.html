@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real-Time video accident detection</title>
+</head>
+<body>
+<h1>Accident example</h1>
+<div id="predictions"></div>
+
+<script>
+    const sseEndpoint = new EventSource('/prediction/sse/{{ identifier }}');
+    sseEndpoint.onmessage = (event) => {
+        const data = event.data;
+        document.getElementById('predictions').innerHTML = data + '<br>';
+    }
+</script>
+</body>
+</html>

@@ -4,3 +4,5 @@ tensorflow-directml-plugin
 numpy~=1.26.1
 opencv-python~=4.8.1.78
 python-dotenv
+beautifulsoup4
+selenium

@@ -4,21 +4,24 @@ from apps.prediction import utility
 from apps.prediction import bp
 
 
-@bp.route('/')
+@bp.route("/")
 def index():
-    return render_template('prediction.html')
+    return render_template("prediction.html")
 
 
-@bp.route('/<identifier>')
+@bp.route("/<identifier>")
 def home(identifier):
-    return render_template('prediction.html', identifier=identifier)
+    return render_template("prediction.html", identifier=identifier)
 
 
-@bp.route('/sse/<identifier>')
+@bp.route("/sse/<identifier>")
 def sse(identifier):
-    return Response(stream_with_context(utility.predictions(identifier)), mimetype='text/event-stream')
+    return Response(
+        stream_with_context(utility.predictions(identifier)),
+        mimetype="text/event-stream",
+    )
 
 
 @bp.app_errorhandler(404)
 def page_not_found(e):
-    return '404 Not Found', 404
+    return "404 Not Found", 404

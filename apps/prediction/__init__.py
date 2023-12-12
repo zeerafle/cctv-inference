@@ -1,5 +1,7 @@
-from flask import Blueprint, Response, render_template, stream_with_context
+from flask import Blueprint
 
-bp = Blueprint('prediction', __name__, template_folder='../templates/prediction')
+bp = Blueprint("prediction", __name__, template_folder="../templates/prediction")
 
 from apps.prediction import routes
+
+# pylama:ignore=W0611

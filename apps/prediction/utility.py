@@ -3,12 +3,23 @@ import numpy as np
 import cv2
 from bs4 import BeautifulSoup
 from selenium import webdriver
+import json
 
 model = tf.keras.models.load_model('model.h5', compile=False)
 CCTV_BASE_URL = 'https://diskominfo.samarindakota.go.id/api/cctv/'
+with open('stream_url.json') as f:
+    stream_urls = json.load(f)
+
+
+def write_stream_url(identifier, stream_url):
+    stream_urls[identifier] = stream_url
+    with open('stream_url.json', 'w') as f:
+        json.dump(stream_urls, f)
 
 
 def make_stream_url(identifier):
+    if stream_urls:
+        return stream_urls[identifier]
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
@@ -18,10 +29,12 @@ def make_stream_url(identifier):
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     stream_url = soup.find('video')['src']
     driver.quit()
+    write_stream_url(identifier, stream_url)
     return stream_url
 
 
 def predictions(identifier):
+    # TODO: catch error if stream_url is not available or not accessible
     cap = cv2.VideoCapture(make_stream_url(identifier))
     while True:
         ret, frame = cap.read()

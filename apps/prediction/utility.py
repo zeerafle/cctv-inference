@@ -4,6 +4,9 @@ import cv2
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import json
+import os
+from datetime import datetime
+from threading import Thread
 
 model = tf.keras.models.load_model("model.h5", compile=False)
 CCTV_BASE_URL = "https://diskominfo.samarindakota.go.id/api/cctv/"
@@ -33,6 +36,12 @@ def make_stream_url(identifier):
     return stream_url
 
 
+def save_frame(frame, result, identifier):
+    now = datetime.now()
+    now = now.strftime("%d-%m-%Y_%H-%M-%S")
+    cv2.imwrite(os.path.join("data", result, f"{identifier}_{str(now)}.jpg"), frame)
+
+
 def predictions(identifier):
     # TODO: catch error if stream_url is not available or not accessible
     cap = cv2.VideoCapture(make_stream_url(identifier))
@@ -41,6 +50,7 @@ def predictions(identifier):
         if not ret:
             continue
         result = predict_frame(frame)
+        Thread(target=save_frame, args=(frame, result, identifier)).start()
         print(result)
         yield f"data: {result}\n\n"
 
@@ -53,6 +63,6 @@ def predict_frame(img):
     img_batch = np.expand_dims(img_array, axis=0)
     prediction = (model.predict(img_batch) > 0.5).astype("int32")
     if prediction[0][0] == 0:
-        return "Terjadi kecelakaan"
+        return "accident"
     else:
-        return "Normal"
+        return "normal"

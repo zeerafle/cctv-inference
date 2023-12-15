@@ -5,11 +5,14 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 import json
 import os
+import tempfile
 from datetime import datetime
 from threading import Thread
+from apps.prediction.s3 import upload_file
 
 model = tf.keras.models.load_model("model.h5", compile=False)
 CCTV_BASE_URL = "https://diskominfo.samarindakota.go.id/api/cctv/"
+BUCKET_NAME = os.environ.get("BUCKET_NAME")
 with open("stream_url.json") as f:
     stream_urls = json.load(f)
 
@@ -39,7 +42,14 @@ def make_stream_url(identifier):
 def save_frame(frame, result, identifier):
     now = datetime.now()
     now = now.strftime("%d-%m-%Y_%H-%M-%S")
-    cv2.imwrite(os.path.join("data", result, f"{identifier}_{str(now)}.jpg"), frame)
+    filename = f"{identifier}_{str(now)}.jpg"
+    temp_filename = os.path.join(tempfile.gettempdir(), filename)
+    # Save the frame to a temporary file
+    cv2.imwrite(temp_filename, frame)
+    # Upload the temporary file to S3
+    upload_file(temp_filename, BUCKET_NAME, f"{result}/{filename}")
+    # Remove the temporary file
+    os.remove(temp_filename)
 
 
 def predictions(identifier):

@@ -13,8 +13,18 @@
     ```
 4. Go to your inference server's URL, e.g. `http://localhost:5000`, follow the instruction there to test the API.
 
+Currently, the predicted frame is stored in local directory. Create a directory named `data` in the root directory.
+Inside it, create directories `normal` and `accident` to store the predicted frames.
+
 ## Example
 
 ![Example](https://github.com/zeerafle/cctv-inference/blob/master/example.gif)
+
+## TODO
+
+- [x] Store the predicted frames
+- [ ] Write test
+- [ ] Connect to cloud bucket storage
+- [ ] Actually deploy it
 
 

@@ -1,16 +1,22 @@
 import tensorflow as tf
 import numpy as np
 import cv2
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+
 import json
 import os
 import tempfile
 from datetime import datetime
+
 from threading import Thread
 from apps.prediction.s3 import upload_file
 
 model = tf.keras.models.load_model("model.h5", compile=False)
+CHROMEDRIVER_DIR = os.getenv("CHROMEDRIVER_DIR")
+DRIVER_PATH = os.path.join(CHROMEDRIVER_DIR, "chromedriver")
 CCTV_BASE_URL = "https://diskominfo.samarindakota.go.id/api/cctv/"
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
 with open("stream_url.json") as f:
@@ -30,7 +36,8 @@ def make_stream_url(identifier):
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(options=options)
+    service = Service(executable_path=DRIVER_PATH)
+    driver = webdriver.Chrome(options=options, service=service)
     driver.get(CCTV_BASE_URL + identifier)
     soup = BeautifulSoup(driver.page_source, "html.parser")
     stream_url = soup.find("video")["src"]

@@ -2,6 +2,15 @@
 
 ## How to run
 
+1. Create a file named `.flaskenv` in the root directory, put the following content in it:
+    ```
+    FLASK_APP=cctv.py
+    FLASK_ENV=development
+    FLASK_DEBUG=1
+    AWS_ACCESS_KEY_ID=<your AWS access key>
+    AWS_SECRET_ACCESS_KEY=<your AWS secret access key>
+    BUCKET_NAME=<your bucket name>
+    ```
 1. Install requirements (or create a virtual environment beforehand), e.g.:
     ```bash
     pip install -r requirements.txt
@@ -13,8 +22,7 @@
     ```
 4. Go to your inference server's URL, e.g. `http://localhost:5000`, follow the instruction there to test the API.
 
-Currently, the predicted frame is stored in local directory. Create a directory named `data` in the root directory.
-Inside it, create directories `normal` and `accident` to store the predicted frames.
+The predicted frame is stored in AWS S3 bucket. It'll automatically create directory based on the predicted class, e.g. `accident` or `normal`.
 
 ## Example
 
@@ -24,7 +32,7 @@ Inside it, create directories `normal` and `accident` to store the predicted fra
 
 - [x] Store the predicted frames
 - [ ] Write test
-- [ ] Connect to cloud bucket storage
+- [x] Connect to cloud bucket storage
 - [ ] Actually deploy it
 
 

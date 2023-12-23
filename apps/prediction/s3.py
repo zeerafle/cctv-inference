@@ -1,4 +1,5 @@
 import boto3
+from botocore.config import Config
 from botocore.exceptions import ClientError
 
 
@@ -15,7 +16,8 @@ def upload_file(file_name, bucket, object_name=None):
         object_name = file_name
 
     # Upload the file
-    s3_client = boto3.client("s3")
+    config = Config(read_timeout=70, connect_timeout=70, retries={"max_attempts": 10})
+    s3_client = boto3.client("s3", config=config)
     try:
         s3_client.upload_file(file_name, bucket, object_name)
     except ClientError as e:

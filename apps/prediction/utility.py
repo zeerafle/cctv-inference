@@ -1,10 +1,11 @@
+import random
+
 import tensorflow as tf
 import numpy as np
 import cv2
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 
 import json
 import os
@@ -15,8 +16,6 @@ from threading import Thread
 from apps.prediction.s3 import upload_file
 
 model = tf.keras.models.load_model("model.h5", compile=False)
-CHROMEDRIVER_DIR = os.getenv("CHROMEDRIVER_DIR")
-DRIVER_PATH = os.path.join(CHROMEDRIVER_DIR, "chromedriver")
 CCTV_BASE_URL = "https://diskominfo.samarindakota.go.id/api/cctv/"
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
 with open("stream_url.json") as f:
@@ -30,14 +29,13 @@ def write_stream_url(identifier, stream_url):
 
 
 def make_stream_url(identifier):
-    if stream_urls:
+    if stream_urls.get(identifier) is not None and stream_urls[identifier]:
         return stream_urls[identifier]
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
-    service = Service(executable_path=DRIVER_PATH)
-    driver = webdriver.Chrome(options=options, service=service)
+    driver = webdriver.Chrome(options=options)
     driver.get(CCTV_BASE_URL + identifier)
     soup = BeautifulSoup(driver.page_source, "html.parser")
     stream_url = soup.find("video")["src"]
@@ -49,7 +47,8 @@ def make_stream_url(identifier):
 def save_frame(frame, result, identifier):
     now = datetime.now()
     now = now.strftime("%d-%m-%Y_%H-%M-%S")
-    filename = f"{identifier}_{str(now)}.jpg"
+    unique_id = random.randint(1, 1000)
+    filename = f"{identifier}_{str(now)}_{unique_id}.jpg"
     temp_filename = os.path.join(tempfile.gettempdir(), filename)
     # Save the frame to a temporary file
     cv2.imwrite(temp_filename, frame)

@@ -1,5 +1,6 @@
 /venv/
 /.venv
+/node_modules
 /Car accident Caught CCTV India _2.mp4
 /model.h5
 *.zip

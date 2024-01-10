@@ -8,14 +8,15 @@ import cv2
 import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
-from flask import current_app
 
 
-def upload_file(file_name, bucket, object_name=None):
+def upload_file(file_name, bucket, access_key, secret_key, object_name=None):
     """Upload a file to an S3 bucket.
 
     :param file_name: File to upload
     :param bucket: Bucket to upload to
+    :param access_key: AWS access key
+    :param secret_key: AWS secret key
     :param object_name: S3 object name. If not specified then file_name is used
     :return: True if file was uploaded, else False
     """
@@ -28,8 +29,8 @@ def upload_file(file_name, bucket, object_name=None):
     s3_client = boto3.client(
         "s3",
         config=config,
-        aws_access_key_id=current_app.config["AWS_ACCESS_KEY_ID"],
-        aws_secret_access_key=current_app.config["AWS_SECRET_ACCESS_KEY"],
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
     )
     try:
         s3_client.upload_file(file_name, bucket, object_name)
@@ -40,7 +41,7 @@ def upload_file(file_name, bucket, object_name=None):
     return True
 
 
-def save_frame(frame, result, identifier):
+def save_frame(frame, result, identifier, bucket_name, access_key, secret_key):
     try:
         now = datetime.now()
         now = now.strftime("%d-%m-%Y_%H-%M-%S")
@@ -50,18 +51,16 @@ def save_frame(frame, result, identifier):
         # Save the frame to a temporary file
         cv2.imwrite(temp_filename, frame)
         # Upload the temporary file to S3
+        # with current_app.app_context():
         upload_file(
-            temp_filename, current_app.config["BUCKET_NAME"], f"{result}/{filename}"
+            temp_filename,
+            bucket_name,
+            access_key,
+            secret_key,
+            f"{result}/{filename}",
         )
+        print(bucket_name)
         # Remove the temporary file
-        print(current_app.config["BUCKET_NAME"])
         os.remove(temp_filename)
     except Exception as e:
         print(e)
-
-
-def save_frame_task(frame, result, identifier):
-    with current_app.app_context():
-        len_q = len(current_app.task_queue)
-        print(f"Task queue length: {len_q}")
-        save_frame(frame, result, identifier)

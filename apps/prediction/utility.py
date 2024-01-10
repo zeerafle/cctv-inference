@@ -1,23 +1,18 @@
-import random
-
+import requests
 import tensorflow as tf
 import numpy as np
 import cv2
 
 from bs4 import BeautifulSoup
+from flask import current_app
 from selenium import webdriver
 
 import json
-import os
-import tempfile
-from datetime import datetime
 
-from threading import Thread
-from apps.prediction.s3 import upload_file
+from apps.saving.uploads import save_frame
 
 model = tf.keras.models.load_model("model.h5", compile=False)
 CCTV_BASE_URL = "https://diskominfo.samarindakota.go.id/api/cctv/"
-BUCKET_NAME = os.environ.get("BUCKET_NAME")
 with open("stream_url.json") as f:
     stream_urls = json.load(f)
 
@@ -44,29 +39,26 @@ def make_stream_url(identifier):
     return stream_url
 
 
-def save_frame(frame, result, identifier):
-    now = datetime.now()
-    now = now.strftime("%d-%m-%Y_%H-%M-%S")
-    unique_id = random.randint(1, 1000)
-    filename = f"{identifier}_{str(now)}_{unique_id}.jpg"
-    temp_filename = os.path.join(tempfile.gettempdir(), filename)
-    # Save the frame to a temporary file
-    cv2.imwrite(temp_filename, frame)
-    # Upload the temporary file to S3
-    upload_file(temp_filename, BUCKET_NAME, f"{result}/{filename}")
-    # Remove the temporary file
-    os.remove(temp_filename)
-
-
 def predictions(identifier):
-    # TODO: catch error if stream_url is not available or not accessible
+    req = requests.get(CCTV_BASE_URL + identifier)
+    if req.status_code != 200:
+        yield "CCTV not found"
     cap = cv2.VideoCapture(make_stream_url(identifier))
     while True:
         ret, frame = cap.read()
         if not ret:
             continue
         result = predict_frame(frame)
-        Thread(target=save_frame, args=(frame, result, identifier)).start()
+        with current_app.app_context():
+            current_app.task_queue.enqueue(
+                save_frame,
+                frame,
+                result,
+                identifier,
+                current_app.config["BUCKET_NAME"],
+                current_app.config["AWS_ACCESS_KEY_ID"],
+                current_app.config["AWS_SECRET_ACCESS_KEY"],
+            )
         print(result)
         yield f"data: {result}\n\n"
 

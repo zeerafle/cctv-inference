@@ -39,6 +39,19 @@ def make_stream_url(identifier):
     return stream_url
 
 
+def predict_frame(img):
+    img = tf.keras.preprocessing.image.smart_resize(
+        img, (250, 250), interpolation="bilinear"
+    )
+    img_array = tf.keras.utils.img_to_array(img)
+    img_batch = np.expand_dims(img_array, axis=0)
+    prediction = (model.predict(img_batch) > 0.5).astype("int32")
+    if prediction[0][0] == 0:
+        return "accident"
+    else:
+        return "normal"
+
+
 def predictions(identifier):
     req = requests.get(CCTV_BASE_URL + identifier)
     if req.status_code != 200:
@@ -63,14 +76,3 @@ def predictions(identifier):
         yield f"data: {result}\n\n"
 
 
-def predict_frame(img):
-    img = tf.keras.preprocessing.image.smart_resize(
-        img, (250, 250), interpolation="bilinear"
-    )
-    img_array = tf.keras.utils.img_to_array(img)
-    img_batch = np.expand_dims(img_array, axis=0)
-    prediction = (model.predict(img_batch) > 0.5).astype("int32")
-    if prediction[0][0] == 0:
-        return "accident"
-    else:
-        return "normal"

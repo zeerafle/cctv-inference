@@ -1,0 +1,22 @@
+name: cctv-inference
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9
+  - fastapi
+  - pylama
+  - numpy
+  - python-dotenv
+  - beautifulsoup4
+  - selenium
+  - black
+  - boto3
+  - rq
+  - ca-certificates
+  - openssl
+  - fastapi-cli
+  - certifi
+  - tensorflow
+  - psutil
+prefix: D:\Scoop\apps\mambaforge\current\envs\cctv-inference

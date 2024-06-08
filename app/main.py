@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -42,8 +42,8 @@ def main():
 
 
 @app.get("/prediction/sse/{cctv_id}")
-def read_sse(cctv_id: str):
-    return StreamingResponse(predict(cap[cctv_id]), media_type="text/event-stream")
+def read_sse(cctv_id: str, background_tasks: BackgroundTasks):
+    return StreamingResponse(predict(cap[cctv_id], cctv_id, background_tasks), media_type="text/event-stream")
 
 
 @app.get("/monitor/idle")

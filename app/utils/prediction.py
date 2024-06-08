@@ -1,6 +1,14 @@
+import os
+from dotenv import load_dotenv
+
 import tensorflow as tf
 import numpy as np
 
+from fastapi import BackgroundTasks
+
+from .saving import save_frame
+
+load_dotenv()
 model = tf.keras.models.load_model("model.h5", compile=False)
 
 
@@ -17,21 +25,17 @@ def predict_frame(img):
         return "normal"
 
 
-def predict(cap):
+def predict(cap, identifier, background_tasks: BackgroundTasks):
     while True:
         ret, frame = cap.read()
         if not ret:
             continue
         result = predict_frame(frame)
-        # with current_app.app_context():
-        #     current_app.task_queue.enqueue(
-        #         save_frame,
-        #         frame,
-        #         result,
-        #         identifier,
-        #         current_app.config["BUCKET_NAME"],
-        #         current_app.config["AWS_ACCESS_KEY_ID"],
-        #         current_app.config["AWS_SECRET_ACCESS_KEY"],
-        #     )
+        background_tasks.add_task(
+            save_frame,
+            frame,
+            result,
+            identifier
+        )
         print(result)
         yield f"data: {result}\n\n"

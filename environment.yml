@@ -8,15 +8,13 @@ dependencies:
   - pylama
   - numpy
   - python-dotenv
-  - beautifulsoup4
-  - selenium
   - black
   - boto3
-  - rq
   - ca-certificates
   - openssl
   - fastapi-cli
   - certifi
   - tensorflow
   - psutil
+  - transformers
 prefix: D:\Scoop\apps\mambaforge\current\envs\cctv-inference

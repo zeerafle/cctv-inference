@@ -49,7 +49,7 @@ def upload_file(file_name, object_name=None):
     return True
 
 
-def save_frame(frame, result, identifier):
+async def save_frame(frame, result, identifier):
     try:
         now = datetime.now()
         now = now.strftime("%d-%m-%Y_%H-%M-%S")

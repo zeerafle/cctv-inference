@@ -2,12 +2,10 @@ from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.utils.prediction import predict, predict_frame
+from app.utils.prediction import predict
 
 import cv2
 import json
-
-import psutil
 
 app = FastAPI()
 
@@ -44,29 +42,3 @@ def main():
 @app.get("/prediction/sse/{cctv_id}")
 def read_sse(cctv_id: str, background_tasks: BackgroundTasks):
     return StreamingResponse(predict(cap[cctv_id], cctv_id, background_tasks), media_type="text/event-stream")
-
-
-@app.get("/monitor/idle")
-def monitor_idle():
-    cpu_usage = psutil.cpu_percent()
-    ram_usage = psutil.virtual_memory().percent
-    return {"CPU Usage": cpu_usage, "RAM Usage": ram_usage}
-
-
-def simulate_request(cap, num_frames=10):
-    for _ in range(num_frames):
-        ret, frame = cap.read()
-        if not ret:
-            continue
-        result = predict_frame(frame)
-        print(result)
-
-
-@app.get("/monitor/request")
-def monitor_request():
-    # Simulate a request by predicting a certain number of frames
-    simulate_request(cap["simpang-antasari-siradj-salman"])
-
-    cpu_usage = psutil.cpu_percent()
-    ram_usage = psutil.virtual_memory().percent
-    return {"CPU Usage": cpu_usage, "RAM Usage": ram_usage}

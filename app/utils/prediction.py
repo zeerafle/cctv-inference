@@ -1,6 +1,9 @@
 from dotenv import load_dotenv
 import json
 
+from starlette.requests import Request
+import asyncio
+
 from .saving import save_frame
 import cv2
 import torch
@@ -13,7 +16,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CONFIDENCE_TRESHOLD = 0.5
 
 
-def inference(processor, model, image):
+async def inference(processor, model, image):
     # load image and predict
     inputs = processor(images=image, return_tensors="pt").to(DEVICE)
     outputs = model(**inputs)
@@ -25,13 +28,30 @@ def inference(processor, model, image):
     )[0]
 
 
-def predict(processor, model, cap, identifier, background_tasks: BackgroundTasks):
-    while True:
+async def predict(
+    request: Request,
+    processor,
+    model,
+    cap,
+    identifier,
+    background_tasks: BackgroundTasks,
+):
+    should_continue = True
+
+    # used to stop predict function when the client disconnects
+    async def stop():
+        nonlocal should_continue
+        await request.is_disconnected()
+        should_continue = False
+
+    background_tasks.add_task(stop)
+
+    while should_continue:
         ret, frame = cap.read()
         if not ret:
             continue
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = inference(processor, model, rgb_frame)
+        results = await inference(processor, model, rgb_frame)
         results_json = {
             key: value.tolist()
             for key, value in results.items()
@@ -40,4 +60,7 @@ def predict(processor, model, cap, identifier, background_tasks: BackgroundTasks
 
         print("transformer result", results_json)
         background_tasks.add_task(save_frame, frame, results_json, identifier)
-        yield f"data: {json.dumps(results_json)}\n\n"
+
+        yield f"{json.dumps(results_json)}\n\n"
+
+        await asyncio.sleep(0.1)

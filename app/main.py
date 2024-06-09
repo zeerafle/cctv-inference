@@ -1,4 +1,4 @@
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, Request, status
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -48,9 +48,11 @@ async def ping():
     return {"message": "pong"}
 
 
-@app.get("/prediction/sse/{cctv_id}")
-def read_sse(cctv_id: str, background_tasks: BackgroundTasks):
+@app.post("/invocations")
+def invocations(request: Request, background_tasks: BackgroundTasks):
+    cctv_id = request.query_params["identifier"]
     return StreamingResponse(
-        predict(processor, model, cap[cctv_id], cctv_id, background_tasks),
+        predict(request, processor, model, cap[cctv_id], cctv_id, background_tasks),
+        status_code=status.HTTP_200_OK,
         media_type="text/event-stream",
     )

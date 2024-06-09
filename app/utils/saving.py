@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 from datetime import datetime
@@ -26,7 +27,7 @@ def upload_file(file_name, object_name=None):
     :param object_name: S3 object name. If not specified then file_name is used
     :return: True if file was uploaded, else False
     """
-    print('uploading file')
+    print("uploading file")
     # If S3 object_name was not specified, use file_name
     if object_name is None:
         object_name = file_name
@@ -41,7 +42,7 @@ def upload_file(file_name, object_name=None):
     )
     try:
         s3_client.upload_file(file_name, bucket, object_name)
-        print(file_name, 'uploaded')
+        print(file_name, "uploaded")
     except ClientError as e:
         # logging.error(e)
         print(e)
@@ -59,12 +60,16 @@ async def save_frame(frame, result, identifier):
         # Save the frame to a temporary file
         cv2.imwrite(temp_filename, frame)
         # Upload the temporary file to S3
-        # with current_app.app_context():
         upload_file(
             temp_filename,
-            f"{result}/{filename}",
+            f"frames{filename}"
         )
+        temp_annotation = os.path.join(tempfile.gettempdir(), f"{temp_filename}.json")
+        with open(temp_annotation, "w") as f:
+            json.dump(result, f)
+            upload_file(temp_annotation, f"annotation/{filename.split('.')[0]}.json")
         # Remove the temporary file
         os.remove(temp_filename)
+        os.remove(temp_annotation)
     except Exception as e:
         print(e)

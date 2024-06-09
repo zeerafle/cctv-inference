@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 import json
 
-from .model import load_model
 from .saving import save_frame
 import cv2
 import torch
@@ -12,10 +11,9 @@ load_dotenv()
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CONFIDENCE_TRESHOLD = 0.5
-processor, model = load_model()
 
 
-def inference(image):
+def inference(processor, model, image):
     # load image and predict
     inputs = processor(images=image, return_tensors="pt").to(DEVICE)
     outputs = model(**inputs)
@@ -27,13 +25,13 @@ def inference(image):
     )[0]
 
 
-def predict(cap, identifier, background_tasks: BackgroundTasks):
+def predict(processor, model, cap, identifier, background_tasks: BackgroundTasks):
     while True:
         ret, frame = cap.read()
         if not ret:
             continue
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = inference(rgb_frame)
+        results = inference(processor, model, rgb_frame)
         results_json = {
             key: value.tolist()
             for key, value in results.items()

@@ -60,10 +60,7 @@ async def save_frame(frame, result, identifier):
         # Save the frame to a temporary file
         cv2.imwrite(temp_filename, frame)
         # Upload the temporary file to S3
-        upload_file(
-            temp_filename,
-            f"frames{filename}"
-        )
+        upload_file(temp_filename, f"frames{filename}")
         temp_annotation = os.path.join(tempfile.gettempdir(), f"{temp_filename}.json")
         with open(temp_annotation, "w") as f:
             json.dump(result, f)

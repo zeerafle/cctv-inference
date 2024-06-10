@@ -1,49 +1,33 @@
 # Accident Detection Inference API
 
-## How to run
+## How to develop
 
-1. Create a file named `.flaskenv` in the root directory, put the following content in it:
+0. Prepare an S3 bucket in AWS, and get your access key and secret access key. This is used to store the predicted frames.
+1. Create a file named `.env` in the root directory, put the following content in it:
     ```
-    FLASK_APP=cctv.py
-    FLASK_ENV=development
-    FLASK_DEBUG=1
     AWS_ACCESS_KEY_ID=<your AWS access key>
     AWS_SECRET_ACCESS_KEY=<your AWS secret access key>
     BUCKET_NAME=<your bucket name>
     ```
-2. Install requirements (or create a virtual environment beforehand), e.g.:
+2. Install conda environment:
     ```bash
-    pip install -r requirements.txt
+    conda env create -f environment.yml 
     ```
-3. Get the model [here](https://drive.google.com/file/d/1bxNL3AA9Ku66ZRkgReVMpAsNnD1OuTEB/view?usp=drive_link)
-4. Install [docker](https://docs.docker.com/get-docker/) or [podman](https://podman.io/getting-started/installation)
-5. Run redis server via docker/podman:
-   ```bash
-   docker run -d -p 6379:6379 redis
-   ```
-   For podman, follow instructions [here](https://computingforgeeks.com/how-to-run-redis-in-podman-docker-container/)
-6. Run redis worker:
-   ```bash
-   rq worker saving-tasks
-   ```
-7. Open another terminal, run the inference server:
+7. Open terminal, run the inference server:
     ```bash
-    flask run
+    fastapi dev
     ```
-8. Go to your inference server's URL, e.g. `http://localhost:5000`, follow the instruction there to test the API.
+8. Go to your inference server's URL, e.g. `http://localhost:8000`. Open docs at `http://localhost:8000/docs` to see the API documentation.
 
 The predicted frame is stored in AWS S3 bucket.
 
 ## Example
 
-![Example](https://github.com/zeerafle/cctv-inference/blob/master/example.gif)
+Live example is available at [https://8zgpur6pwv.ap-southeast-1.awsapprunner.com/](https://8zgpur6pwv.ap-southeast-1.awsapprunner.com/)
 
 ## TODO
 
 - [x] Store the predicted frames
 - [ ] Write test
 - [x] Connect to cloud bucket storage
-- [x] Use redis worker to queue the upload to cloud storage process
-- [ ] Actually deploy it
-
-
+- [x] Actually deploy it

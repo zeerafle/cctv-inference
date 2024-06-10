@@ -14,7 +14,11 @@ app = FastAPI()
 cap = {}
 processor = None
 model = None
-origins = ["http://localhost", "http://localhost:5173"]
+origins = [
+    "http://localhost",
+    "http://localhost:5173",
+    "https://master.diuxi4un1be14.amplifyapp.com/",
+]
 
 app.add_middleware(
     CORSMiddleware,

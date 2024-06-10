@@ -1,0 +1,8 @@
+.devcontainer
+.github
+data
+.deepsource.toml
+.gitignore
+*.mp4
+*.gif
+*.h5

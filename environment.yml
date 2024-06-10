@@ -1,7 +1,8 @@
-name: cctv-inference
+name: base
 channels:
   - defaults
   - conda-forge
+  - pytorch
 dependencies:
   - python=3.9
   - fastapi
@@ -14,7 +15,13 @@ dependencies:
   - openssl
   - fastapi-cli
   - certifi
-  - tensorflow
   - psutil
   - transformers
-prefix: D:\Scoop\apps\mambaforge\current\envs\cctv-inference
+  - pillow
+  - pytorch
+  - torchvision
+  - torchaudio
+  - cpuonly
+  - timm
+  - pip:
+      - opencv-python

@@ -1,7 +1,8 @@
-from fastapi import FastAPI, BackgroundTasks, Request, status
+from fastapi import FastAPI, Request, BackgroundTasks, status
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.model.invocation import InvocationRequest
 from app.utils.model import load_model
 from app.utils.prediction import predict
 
@@ -14,15 +15,10 @@ app = FastAPI()
 cap = {}
 processor = None
 model = None
-origins = [
-    "http://localhost",
-    "http://localhost:5173",
-    "https://master.diuxi4un1be14.amplifyapp.com/",
-]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -53,10 +49,14 @@ async def ping():
 
 
 @app.post("/invocations")
-def invocations(request: Request, background_tasks: BackgroundTasks):
-    cctv_id = request.query_params["identifier"]
+def invocations(
+    request: Request, invocation: InvocationRequest, background_tasks: BackgroundTasks
+):
+    identifier = invocation.identifier
     return StreamingResponse(
-        predict(request, processor, model, cap[cctv_id], cctv_id, background_tasks),
+        predict(
+            request, processor, model, cap[identifier], identifier, background_tasks
+        ),
         status_code=status.HTTP_200_OK,
         media_type="text/event-stream",
     )

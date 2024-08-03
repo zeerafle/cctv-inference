@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 def stream_video():
     # dummy video to serve as stream
-    video_path = "Car accident Caught CCTV India _2.mp4"
+    video_path = "../Car accident Caught CCTV India _2.mp4"
     with open(video_path, "rb") as video_file:
         while True:
             chunk: bytes = video_file.read(1024)

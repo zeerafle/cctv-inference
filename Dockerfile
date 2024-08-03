@@ -1,9 +1,7 @@
-FROM mambaorg/micromamba:latest
-
-COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml /tmp/environment.yml
+FROM python:3.9-slim-buster
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 # install necessary opencv dependencies
-USER root
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install\
     libgl1\
     libgl1-mesa-glx \
@@ -13,21 +11,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install\
     libglib2.0-0 -y && \
     rm -rf /var/lib/apt/lists/*
 
-USER $MAMBA_USER
-RUN micromamba install -y -n base -f /tmp/environment.yml && \
-    micromamba clean --all --yes
-
-ARG MAMBA_DOCKERFILE_ACTIVATE=1
-
-# copy the rest of the code
 COPY . /app
 WORKDIR /app
 
-# change the owner of the file
-USER root
-RUN chown $MAMBA_USER:$MAMBA_USER /app/run_server.sh
+RUN uv venv /opt/venv
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN uv pip install -r requirements.txt
 
-# run the app
-USER $MAMBA_USER
-RUN chmod +x /app/run_server.sh
-ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "/app/run_server.sh"]
+CMD ["uvicorn", "app.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8080"]
